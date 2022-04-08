@@ -3,6 +3,7 @@ package main.cube3d;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point3D;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Box;
@@ -35,6 +36,8 @@ public class Shape3dController {
 
     private double size;
 
+    private boolean dragged = false;
+
     public Shape3dController(double size) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(CustomButtonsController.class.getResource("/shape3d.fxml"));
         fxmlLoader.setControllerFactory(type -> this);
@@ -44,6 +47,11 @@ public class Shape3dController {
     }
 
     private void initListeners() {
+
+        root.setOnMouseExited(event -> dragged = false);
+        box.setOnMouseExited(event -> dragged = false);
+        box.setOnMouseDragReleased(event -> dragged = false);
+        box.setOnMouseDragExited(event -> dragged = false);
         box.setOnMousePressed(event -> boxX = event.getScreenX());
         box.setOnMouseDragged(event -> {
             double deltaX = (event.getScreenX() - boxX);
@@ -55,17 +63,22 @@ public class Shape3dController {
                 box.getTransforms().add(transform);
             }
             boxX = event.getScreenX();
+            dragged = true;
         });
-
-        box.setOnMouseReleased(e -> {
-            PickResult pr = e.getPickResult();
+        box.setOnMouseClicked(event -> {
+            if(dragged) {
+                dragged = false;
+                return;
+            }
+            PickResult pr = event.getPickResult();
             Tools.Side side = Tools.Side.getByPoint(pr.getIntersectedPoint(), size);
-            boxSideAction(side);
+            boxSideAction(event, side);
         });
-        shadow.setOnMouseReleased(e -> boxSideAction(Tools.Side.BOTTOM));
+        shadow.setOnMouseClicked(event -> boxSideAction(event, Tools.Side.BOTTOM));
     }
 
-    private void boxSideAction(Tools.Side side) {
+    private void boxSideAction(MouseEvent event, Tools.Side side) {
+        event.consume();
         switch (side) {
         case TOP:
         case LEFT:
@@ -73,12 +86,12 @@ public class Shape3dController {
         case RIGHT:
         case BACK:
         case FRONT:
-//            TODO
+            //            TODO
             System.out.println(side);
         }
     }
 
-    private void resize(double size) {
+    public void resize(double size) {
         this.size = size;
         box.setHeight(size);
         box.setWidth(size);
