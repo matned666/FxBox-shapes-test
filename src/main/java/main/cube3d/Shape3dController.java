@@ -3,7 +3,6 @@ package main.cube3d;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point3D;
-import javafx.geometry.Side;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Box;
@@ -17,8 +16,12 @@ import java.io.IOException;
 
 public class Shape3dController {
 
+    public static final int MAX_TRANSFORMERS_PER_BOX = 1000;
+    public static final double SHADOW_SIZE_MODIFIER = 0.6;
+    public static final double SHADOW_DISTANCE_Y_MODIFIER = 0.3;
+
     @FXML
-    public Ellipse shadow;
+    private Ellipse shadow;
 
     @FXML
     private Circle moveCircle;
@@ -30,20 +33,21 @@ public class Shape3dController {
 
     private double boxX;
 
-    double size;
+    private double size;
 
     public Shape3dController(double size) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(CustomButtonsController.class.getResource("/shape3d.fxml"));
         fxmlLoader.setControllerFactory(type -> this);
         root = fxmlLoader.load();
+        resize(size);
+        initListeners();
+    }
 
-        this.size = size;
-        resize();
-
+    private void initListeners() {
         box.setOnMousePressed(event -> boxX = event.getScreenX());
         box.setOnMouseDragged(event -> {
             double deltaX = (event.getScreenX() - boxX);
-            if (box.getTransforms().size() > 1000) {
+            if (box.getTransforms().size() > MAX_TRANSFORMERS_PER_BOX) {
                 box.getTransforms().clear();
             }
             if (deltaX != 0) {
@@ -53,22 +57,34 @@ public class Shape3dController {
             boxX = event.getScreenX();
         });
 
-        box.setOnMouseReleased(e->{
+        box.setOnMouseReleased(e -> {
             PickResult pr = e.getPickResult();
             Tools.Side side = Tools.Side.getByPoint(pr.getIntersectedPoint(), size);
-            System.out.println(side);
+            boxSideAction(side);
         });
-        shadow.setOnMouseReleased(e-> System.out.println(Side.BOTTOM));
-
+        shadow.setOnMouseReleased(e -> boxSideAction(Tools.Side.BOTTOM));
     }
 
-    private void resize() {
+    private void boxSideAction(Tools.Side side) {
+        switch (side) {
+        case TOP:
+        case LEFT:
+        case BOTTOM:
+        case RIGHT:
+        case BACK:
+        case FRONT:
+//            TODO
+            System.out.println(side);
+        }
+    }
+
+    private void resize(double size) {
+        this.size = size;
         box.setHeight(size);
         box.setWidth(size);
         box.setDepth(size);
-
-        shadow.setRadiusX(size * 0.6);
-        shadow.setRadiusY(size * 0.3);
+        shadow.setRadiusX(size * SHADOW_SIZE_MODIFIER);
+        shadow.setRadiusY(size * SHADOW_DISTANCE_Y_MODIFIER);
         shadow.setTranslateY(size);
     }
 
@@ -88,7 +104,7 @@ public class Shape3dController {
         }
 
         private enum Side {
-            TOP, LEFT, RIGHT , FRONT, BACK, BOTTOM;
+            TOP, LEFT, RIGHT, FRONT, BACK, BOTTOM;
 
             private static Side getByPoint(Point3D point, double size) {
                 Axis axis = Axis.getByPoint(point, size);
@@ -103,7 +119,8 @@ public class Shape3dController {
             }
 
             private enum Axis {
-                X,Y,Z;
+                X, Y, Z;
+
                 private static Axis getByPoint(Point3D point, double size) {
                     if (Tools.compareDouble(Math.abs(point.getX()), size / 2)) {
                         return X;

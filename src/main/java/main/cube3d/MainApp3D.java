@@ -10,7 +10,8 @@ import main.cube2d.CustomButtonsController;
 
 public class MainApp3D extends Application {
 
-    @Override public void start(Stage primaryStage) throws Exception {
+    @Override
+    public void start(Stage primaryStage) throws Exception {
 
         Shape3dController controller = new Shape3dController(30);
 
