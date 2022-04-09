@@ -3,6 +3,7 @@ package main;
 import javafx.application.Application;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -13,9 +14,9 @@ public class MainApp3DMesh extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        Mesh3DController controller = new Mesh3DController(50);
+        RotatedNode3D controller = Mesh3DController.create(new Mesh3DController(), 50);
 
-        StackPane root = controller.getRoot();
+        Pane root = controller.getRoot();
         Scene scene = new Scene(root);
         primaryStage.initStyle(StageStyle.TRANSPARENT);
         scene.setFill(Color.TRANSPARENT);

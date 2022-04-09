@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Circle;
@@ -18,17 +19,27 @@ import javafx.scene.transform.Transform;
 
 import java.io.IOException;
 
-public class Mesh3DController {
+public class Mesh3DController implements RotatedNode3D {
 
     public static final int MAX_TRANSFORMS_PER_BOX = 1000;
     public static final double SHADOW_SIZE_MODIFIER = 0.7;
     public static final double SHADOW_PLACE_MODIFIER = 0.8;
     public static final double SHADOW_DISTANCE_Y_MODIFIER = 0.3;
 
-    private final StackPane root;
+    public static RotatedNode3D create(Mesh3DController mesh3DController, float size) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(mesh3DController.getClass().getResource("/mesh3d.fxml"));
+        fxmlLoader.setControllerFactory(type -> mesh3DController);
+        mesh3DController.root = fxmlLoader.load();
+        mesh3DController.size = size;
+        mesh3DController.initMesh();
+        mesh3DController.initListeners();
+        return mesh3DController;
+    }
+
+    private StackPane root;
 
     @FXML
-    public Ellipse shadow;
+    private Ellipse shadow;
 
     @FXML
     private MeshView mesh;
@@ -36,19 +47,30 @@ public class Mesh3DController {
     @FXML
     private Circle moveNode;
 
-    float size;
+    private float size;
+
     private double boxX;
     private TriangleMesh triangleMesh;
     private boolean dragged;
 
-
-    public Mesh3DController(float size) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/mesh3d.fxml"));
-        fxmlLoader.setControllerFactory(type -> this);
-        root = fxmlLoader.load();
+    @Override
+    public void resize(float size) {
         this.size = size;
-        initMesh();
-        initListeners();
+        resizeMesh();
+        mesh.toFront();
+        shadow.setRadiusX(size * SHADOW_SIZE_MODIFIER);
+        shadow.setRadiusY(size * SHADOW_DISTANCE_Y_MODIFIER);
+        shadow.setTranslateY(size * SHADOW_PLACE_MODIFIER);
+    }
+
+    @Override
+    public Pane getRoot() {
+        return root;
+    }
+
+    @Override
+    public Node getMoveNode() {
+        return moveNode;
     }
 
     private void initMesh() {
@@ -89,24 +111,6 @@ public class Mesh3DController {
         shadow.setOnMouseClicked(event -> boxSideAction(event, Tools.Side.BOTTOM));
     }
 
-    public void resize(float size) {
-        this.size = size;
-        resizeMesh();
-        mesh.toFront();
-        shadow.setRadiusX(size * SHADOW_SIZE_MODIFIER);
-        shadow.setRadiusY(size * SHADOW_DISTANCE_Y_MODIFIER);
-        shadow.setTranslateY(size * SHADOW_PLACE_MODIFIER);
-
-    }
-
-    public StackPane getRoot() {
-        return root;
-    }
-
-    public Node getMoveNode() {
-        return moveNode;
-    }
-
     private Tools.Side getSide(MouseEvent event) {
         PickResult pr = event.getPickResult();
         return Tools.Side.getByPoint(pr.getIntersectedPoint(), size);
@@ -141,21 +145,28 @@ public class Mesh3DController {
         triangleMesh.getFaceSmoothingGroups().addAll(new int[facets.length / triangleMesh.getFaceElementSize()]);
     }
 
-    private int[] getFacets() {
-        return new int[]{0, 0, 1, 1, 2, 2,        // Top face1
-                1, 1, 3, 3, 2, 2,                 // Top face2
-                0, 12, 4, 4, 1, 13,               // Right face1
-                1, 13, 4, 4, 5, 5,                // Right face2
-                0, 8, 2, 2, 4, 10,                // Back face1
-                2, 2, 6, 6, 4, 10,                // Back face2
-                2, 2, 3, 3, 6, 6,                 // Left face1
-                3, 3, 7, 7, 6, 6,                 // Left face2
-                4, 4, 6, 6, 5, 5,                 // Bottom face1
-                5, 5, 6, 6, 7, 7,                 // Bottom face2
-                1, 9, 5, 11, 3, 3,                // Front face1
-                3, 3, 5, 11, 7, 7};               // Front face1
+    /**
+     * A float array of mesh points x, y and z.
+     * @return float[]
+     */
+    private float[] getPoints() {
+        return new float[]{
+                -size / 2, -size / 2, -size / 2,    //0
+                -size / 2, -size / 2, size / 2,     //1
+                size / 2, -size / 2, -size / 2,     //2
+                size / 2, -size / 2, size / 2,      //3
+                -size / 2, size / 2, -size / 2,     //4
+                -size / 2, size / 2, size / 2,      //5
+                size / 2, size / 2, -size / 2,      //6
+                size / 2, size / 2, size / 2};      //7
     }
 
+    /**
+     * An array of floats representing coordinates v(vertical) and h(horizontal) ratio on a texture map.
+     * The coordinates go to each facet point
+     * - so if there were alternative facets added, they should appear here as well.
+     * @return float[]
+     */
     private float[] getCoords() {
         return new float[]{
                 0.00f, 0.33f,                       //0
@@ -172,20 +183,29 @@ public class Mesh3DController {
                 0.50f, 1.00f,                       //11
                 1.00f, 0.33f,                       //12
                 1.00f, 0.66f                        //13
-
         };
     }
 
-    private float[] getPoints() {
-        return new float[]{
-                -size / 2, -size / 2, -size / 2,    //0
-                -size / 2, -size / 2, size / 2,     //1
-                size / 2, -size / 2, -size / 2,     //2
-                size / 2, -size / 2, size / 2,      //3
-                -size / 2, size / 2, -size / 2,     //4
-                -size / 2, size / 2, size / 2,      //5
-                size / 2, size / 2, -size / 2,      //6
-                size / 2, size / 2, size / 2};      //7
+    /**
+     * An array of integers where each 6 numbers is an index
+     * of a triangleMesh point.
+     * each second index represents an alternative face
+     * for textures connection
+     * @return int[]
+     */
+    private int[] getFacets() {
+        return new int[]{0, 0, 1, 1, 2, 2,        // Top face1
+                1, 1, 3, 3, 2, 2,                 // Top face2
+                0, 12, 4, 4, 1, 13,               // Right face1
+                1, 13, 4, 4, 5, 5,                // Right face2
+                0, 8, 2, 2, 4, 10,                // Back face1
+                2, 2, 6, 6, 4, 10,                // Back face2
+                2, 2, 3, 3, 6, 6,                 // Left face1
+                3, 3, 7, 7, 6, 6,                 // Left face2
+                4, 4, 6, 6, 5, 5,                 // Bottom face1
+                5, 5, 6, 6, 7, 7,                 // Bottom face2
+                1, 9, 5, 11, 3, 3,                // Front face1
+                3, 3, 5, 11, 7, 7};               // Front face1
     }
 
     private void resetToDefaultPos() {
@@ -234,4 +254,5 @@ public class Mesh3DController {
         }
 
     }
+
 }
