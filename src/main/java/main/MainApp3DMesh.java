@@ -1,6 +1,7 @@
 package main;
 
 import javafx.application.Application;
+import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -19,8 +20,10 @@ public class MainApp3DMesh extends Application {
         primaryStage.initStyle(StageStyle.TRANSPARENT);
         scene.setFill(Color.TRANSPARENT);
         primaryStage.setScene(scene);
+
         primaryStage.show();
         primaryStage.setX(primaryStage.getX()*3/2);
+
 
         primaryStage.setAlwaysOnTop(true);
         controller.getMoveNode().setOnMouseDragged(event -> {
@@ -31,4 +34,5 @@ public class MainApp3DMesh extends Application {
         });
 
     }
+
 }
