@@ -1,4 +1,4 @@
-package main.cube3d;
+package main.old.versions.cube3d;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -6,12 +6,9 @@ import javafx.geometry.Point3D;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Box;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Ellipse;
+import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
-import main.cube2d.CustomButtonsController;
 
 import java.io.IOException;
 
@@ -39,7 +36,7 @@ public class Shape3dController {
     private boolean dragged = false;
 
     public Shape3dController(double size) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(CustomButtonsController.class.getResource("/shape3d.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/oldFxml/shape3d.fxml"));
         fxmlLoader.setControllerFactory(type -> this);
         root = fxmlLoader.load();
         resize(size);

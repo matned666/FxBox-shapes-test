@@ -1,4 +1,4 @@
-package main.cube3d;
+package main.old.versions.cube3d;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -6,14 +6,13 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import main.cube2d.CustomButtonsController;
 
 public class MainApp3D extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        Shape3dController controller = new Shape3dController(30);
+        Shape3dController controller = new Shape3dController(100);
 
         StackPane root = controller.getRoot();
         Scene scene = new Scene(root);
@@ -21,7 +20,7 @@ public class MainApp3D extends Application {
         scene.setFill(Color.TRANSPARENT);
         primaryStage.setScene(scene);
         primaryStage.show();
-        primaryStage.setX(primaryStage.getX()+ primaryStage.getX()/2);
+        primaryStage.setX(primaryStage.getX()/2);
 
         primaryStage.setAlwaysOnTop(true);
         controller.getMoveNode().setOnMouseDragged(event -> {

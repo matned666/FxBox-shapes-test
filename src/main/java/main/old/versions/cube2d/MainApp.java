@@ -1,4 +1,4 @@
-package main.cube2d;
+package main.old.versions.cube2d;
 
 import javafx.application.Application;
 import javafx.scene.Scene;

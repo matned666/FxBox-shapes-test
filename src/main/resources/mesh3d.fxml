@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Ellipse?>
+<?import javafx.scene.shape.MeshView?>
+
+
+<StackPane prefHeight="300.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.Mesh3DController">
+   <children>
+      <MeshView fx:id="mesh" />
+      <Circle fx:id="moveNode" fill="#4d4d4dcc" radius="10.0" stroke="#000000bb" strokeType="INSIDE" translateY="-125.0" />
+      <Ellipse fx:id="shadow" fill="#2f2f2f" radiusX="100.0" radiusY="48.0" stroke="#0000005d" strokeType="INSIDE" translateY="65.0" />
+   </children>
+</StackPane>

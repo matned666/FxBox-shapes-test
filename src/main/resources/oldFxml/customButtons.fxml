@@ -9,10 +9,10 @@
 <?import javafx.scene.shape.Path?>
 <?import javafx.scene.shape.Polygon?>
 
-<StackPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.cube2d.CustomButtonsController">
+<StackPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.old.versions.cube2d.CustomButtonsController">
    <Pane fx:id="rootStage">
       <ImageView fx:id="cube" fitHeight="339.0" fitWidth="329.0" layoutX="72.0" layoutY="4.0">
-         <Image url="@img/cube.png" />
+         <Image url="@../img/cube.png" />
       </ImageView>
       <Polygon fx:id="bottomButton" fill="DODGERBLUE" layoutX="72.0" layoutY="4.0" points="164.0, 418.0, 257.0, 282.0, 71.0, 282.0" stroke="TRANSPARENT" strokeType="INSIDE" />
       <Polygon fx:id="otherSideButton" fill="DODGERBLUE" layoutX="82.0" layoutY="14.0" points="217.0, 209.0, 381.0, 24.0, 217.0, 24.0" stroke="TRANSPARENT" strokeType="INSIDE" />

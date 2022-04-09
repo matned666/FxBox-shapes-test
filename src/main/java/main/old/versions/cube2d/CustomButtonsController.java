@@ -1,4 +1,4 @@
-package main.cube2d;
+package main.old.versions.cube2d;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -45,7 +45,7 @@ public class CustomButtonsController implements Initializable {
     private final StackPane root;
 
     public CustomButtonsController(double width, double height) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(CustomButtonsController.class.getResource("/customButtons.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(CustomButtonsController.class.getResource("/oldFxml/customButtons.fxml"));
         fxmlLoader.setControllerFactory(type -> this);
         root = fxmlLoader.load();
         initListeners();
