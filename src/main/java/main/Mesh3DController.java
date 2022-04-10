@@ -24,10 +24,13 @@ public class Mesh3DController implements RotatedNode3D {
     public static final int MAX_TRANSFORMS_PER_BOX = 500;
 
     public static RotatedNode3D createWithSize(float size) throws IOException {
-        Mesh3DController mesh3DController = new Mesh3DController(size);
+        Mesh3DController mesh3DController = new Mesh3DController();
         FXMLLoader fxmlLoader = new FXMLLoader(mesh3DController.getClass().getResource("/mesh3d.fxml"));
         fxmlLoader.setControllerFactory(type -> mesh3DController);
         mesh3DController.root = fxmlLoader.load();
+        mesh3DController.size = size;
+        mesh3DController.initMesh();
+        mesh3DController.initListeners();
         return mesh3DController;
     }
 
@@ -50,10 +53,7 @@ public class Mesh3DController implements RotatedNode3D {
     private double boxX;
     private boolean dragged;
 
-    private Mesh3DController(float size) {
-        this.size = size;
-        initMesh();
-        initListeners();
+    private Mesh3DController() {
     }
 
     @Override
@@ -106,19 +106,11 @@ public class Mesh3DController implements RotatedNode3D {
         mesh.setOnMouseExited(event -> dragged = false);
         mesh.setOnMouseDragReleased(event -> dragged = false);
         mesh.setOnMouseDragExited(event -> dragged = false);
+        shadow.setOnMouseExited(event -> dragged = false);
+        shadow.setOnMouseDragReleased(event -> dragged = false);
+        shadow.setOnMouseDragExited(event -> dragged = false);
         mesh.setOnMousePressed(event -> boxX = event.getScreenX());
-        mesh.setOnMouseDragged(event -> {
-            double deltaX = (event.getScreenX() - boxX);
-            if (mesh.getTransforms().size() > MAX_TRANSFORMS_PER_BOX) {
-                resetToDefaultPos(mesh);
-                resetToDefaultPos(shadow);
-            }
-            Transform transform = new Rotate(deltaX, new Point3D(0, 1, 0));
-            mesh.getTransforms().add(transform);
-            shadow.getTransforms().add(transform);
-            boxX = event.getScreenX();
-            dragged = true;
-        });
+        mesh.setOnMouseDragged(this::onMouseDrag);
         mesh.setOnMouseClicked(event -> {
             if (dragged) {
                 dragged = false;
@@ -127,7 +119,22 @@ public class Mesh3DController implements RotatedNode3D {
             Tools.Side side = getSide(event);
             boxSideAction(event, side);
         });
+        shadow.setOnMousePressed(event -> boxX = event.getScreenX());
+        shadow.setOnMouseDragged(this::onMouseDrag);
         shadow.setOnMouseClicked(event -> boxSideAction(event, Tools.Side.BOTTOM));
+    }
+
+    private void onMouseDrag(MouseEvent event) {
+        double deltaX = (event.getScreenX() - boxX);
+        if (mesh.getTransforms().size() > MAX_TRANSFORMS_PER_BOX) {
+            resetToDefaultPos(mesh);
+            resetToDefaultPos(shadow);
+        }
+        Transform transform = new Rotate(deltaX, new Point3D(0, 1, 0));
+        mesh.getTransforms().add(transform);
+        shadow.getTransforms().add(transform);
+        boxX = event.getScreenX();
+        dragged = true;
     }
 
     private Tools.Side getSide(MouseEvent event) {
