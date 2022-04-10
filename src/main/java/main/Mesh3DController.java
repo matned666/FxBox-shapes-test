@@ -24,13 +24,10 @@ public class Mesh3DController implements RotatedNode3D {
     public static final int MAX_TRANSFORMS_PER_BOX = 500;
 
     public static RotatedNode3D createWithSize(float size) throws IOException {
-        Mesh3DController mesh3DController = new Mesh3DController();
+        Mesh3DController mesh3DController = new Mesh3DController(size);
         FXMLLoader fxmlLoader = new FXMLLoader(mesh3DController.getClass().getResource("/mesh3d.fxml"));
         fxmlLoader.setControllerFactory(type -> mesh3DController);
         mesh3DController.root = fxmlLoader.load();
-        mesh3DController.size = size;
-        mesh3DController.initMesh();
-        mesh3DController.initListeners();
         return mesh3DController;
     }
 
@@ -52,6 +49,12 @@ public class Mesh3DController implements RotatedNode3D {
     private float size;
     private double boxX;
     private boolean dragged;
+
+    private Mesh3DController(float size) {
+        this.size = size;
+        initMesh();
+        initListeners();
+    }
 
     @Override
     public void resize(float size) {
