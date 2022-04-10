@@ -20,7 +20,6 @@ public class MainApp3DMesh extends Application {
         primaryStage.show();
         primaryStage.setX(primaryStage.getX()*3/2);
 
-
         primaryStage.setAlwaysOnTop(true);
         controller.getMoveNode().setOnMouseDragged(event -> {
             double x = event.getScreenX();

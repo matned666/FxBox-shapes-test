@@ -19,6 +19,9 @@ import javafx.scene.transform.Transform;
 
 import java.io.IOException;
 
+/**
+ *  Simple rotating 3D cube
+ */
 public class Mesh3DController implements RotatedNode3D {
 
     public static final int MAX_TRANSFORMS_PER_BOX = 500;
@@ -44,7 +47,6 @@ public class Mesh3DController implements RotatedNode3D {
 
     @FXML
     private Circle moveNode;
-
 
     private final TriangleMesh triangleShadowMesh  = new TriangleMesh();
     private final TriangleMesh triangleMesh  = new TriangleMesh();
@@ -103,14 +105,8 @@ public class Mesh3DController implements RotatedNode3D {
 
     private void initListeners() {
         root.setOnMouseExited(event -> dragged = false);
-        mesh.setOnMouseExited(event -> dragged = false);
-        mesh.setOnMouseDragReleased(event -> dragged = false);
-        mesh.setOnMouseDragExited(event -> dragged = false);
-        shadow.setOnMouseExited(event -> dragged = false);
-        shadow.setOnMouseDragReleased(event -> dragged = false);
-        shadow.setOnMouseDragExited(event -> dragged = false);
-        mesh.setOnMousePressed(event -> boxX = event.getScreenX());
-        mesh.setOnMouseDragged(this::onMouseDrag);
+        initMeshListeners(mesh);
+        initMeshListeners(shadow);
         mesh.setOnMouseClicked(event -> {
             if (dragged) {
                 dragged = false;
@@ -119,9 +115,15 @@ public class Mesh3DController implements RotatedNode3D {
             Tools.Side side = getSide(event);
             boxSideAction(event, side);
         });
+        shadow.setOnMouseClicked(event -> boxSideAction(event, Tools.Side.BOTTOM));
+    }
+
+    private void initMeshListeners(MeshView shadow) {
+        shadow.setOnMouseExited(event -> dragged = false);
+        shadow.setOnMouseDragReleased(event -> dragged = false);
+        shadow.setOnMouseDragExited(event -> dragged = false);
         shadow.setOnMousePressed(event -> boxX = event.getScreenX());
         shadow.setOnMouseDragged(this::onMouseDrag);
-        shadow.setOnMouseClicked(event -> boxSideAction(event, Tools.Side.BOTTOM));
     }
 
     private void onMouseDrag(MouseEvent event) {
