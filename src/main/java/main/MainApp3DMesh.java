@@ -12,13 +12,10 @@ public class MainApp3DMesh extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        RotatedNode3D controller = Mesh3DController.create(new Mesh3DController(), 50);
-
-        Pane root = controller.getRoot();
-        Scene scene = new Scene(root);
-        primaryStage.initStyle(StageStyle.TRANSPARENT);
-        scene.setFill(Color.TRANSPARENT);
+        RotatedNode3D controller = Mesh3DController.createWithSize(50);
+        Scene scene = controller.getScene();
         primaryStage.setScene(scene);
+        primaryStage.initStyle(StageStyle.TRANSPARENT);
 
         primaryStage.show();
         primaryStage.setX(primaryStage.getX()*3/2);

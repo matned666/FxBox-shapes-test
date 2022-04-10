@@ -4,14 +4,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point3D;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.transform.Rotate;
@@ -21,12 +21,10 @@ import java.io.IOException;
 
 public class Mesh3DController implements RotatedNode3D {
 
-    public static final int MAX_TRANSFORMS_PER_BOX = 1000;
-    public static final double SHADOW_SIZE_MODIFIER = 0.7;
-    public static final double SHADOW_PLACE_MODIFIER = 0.8;
-    public static final double SHADOW_DISTANCE_Y_MODIFIER = 0.3;
+    public static final int MAX_TRANSFORMS_PER_BOX = 500;
 
-    public static RotatedNode3D create(Mesh3DController mesh3DController, float size) throws IOException {
+    public static RotatedNode3D createWithSize(float size) throws IOException {
+        Mesh3DController mesh3DController = new Mesh3DController();
         FXMLLoader fxmlLoader = new FXMLLoader(mesh3DController.getClass().getResource("/mesh3d.fxml"));
         fxmlLoader.setControllerFactory(type -> mesh3DController);
         mesh3DController.root = fxmlLoader.load();
@@ -39,7 +37,7 @@ public class Mesh3DController implements RotatedNode3D {
     private StackPane root;
 
     @FXML
-    private Ellipse shadow;
+    private MeshView shadow;
 
     @FXML
     private MeshView mesh;
@@ -47,25 +45,28 @@ public class Mesh3DController implements RotatedNode3D {
     @FXML
     private Circle moveNode;
 
-    private float size;
 
+    private final TriangleMesh triangleShadowMesh  = new TriangleMesh();
+    private final TriangleMesh triangleMesh  = new TriangleMesh();
+
+    private float size;
     private double boxX;
-    private TriangleMesh triangleMesh;
     private boolean dragged;
 
     @Override
     public void resize(float size) {
         this.size = size;
         resizeMesh();
+        resizeShadow();
+        shadow.toFront();
         mesh.toFront();
-        shadow.setRadiusX(size * SHADOW_SIZE_MODIFIER);
-        shadow.setRadiusY(size * SHADOW_DISTANCE_Y_MODIFIER);
-        shadow.setTranslateY(size * SHADOW_PLACE_MODIFIER);
     }
 
     @Override
-    public Pane getRoot() {
-        return root;
+    public Scene getScene() {
+        Scene scene = new Scene(root);
+        scene.setFill(Color.TRANSPARENT);
+        return scene;
     }
 
     @Override
@@ -74,13 +75,27 @@ public class Mesh3DController implements RotatedNode3D {
     }
 
     private void initMesh() {
-        triangleMesh = new TriangleMesh();
+        shadow.setMesh(triangleShadowMesh);
+        PhongMaterial shadowMaterial = new PhongMaterial();
+        shadowMaterial.setDiffuseMap(new Image("img/bottom.png"));
+        shadow.setMaterial(shadowMaterial);
+
+        initTriangleMesh(mesh, triangleMesh, "img/box.png");
+        initTriangleMesh(shadow, triangleShadowMesh, "img/bottom.png");
+
+        resizeShadow();
         resize(size);
+
+        resetToDefaultPos(mesh);
+        resetToDefaultPos(shadow);
+    }
+
+    private void initTriangleMesh(MeshView mesh, TriangleMesh triangleMesh, String imgUrl) {
         mesh.setMesh(triangleMesh);
         PhongMaterial material = new PhongMaterial();
-        material.setDiffuseMap(new Image("img/box.png"));
+        material.setDiffuseMap(new Image(imgUrl));
         mesh.setMaterial(material);
-        resetToDefaultPos();
+
     }
 
     private void initListeners() {
@@ -89,14 +104,15 @@ public class Mesh3DController implements RotatedNode3D {
         mesh.setOnMouseDragReleased(event -> dragged = false);
         mesh.setOnMouseDragExited(event -> dragged = false);
         mesh.setOnMousePressed(event -> boxX = event.getScreenX());
-        mesh.setOnMousePressed(event -> boxX = event.getScreenX());
         mesh.setOnMouseDragged(event -> {
             double deltaX = (event.getScreenX() - boxX);
             if (mesh.getTransforms().size() > MAX_TRANSFORMS_PER_BOX) {
-                resetToDefaultPos();
+                resetToDefaultPos(mesh);
+                resetToDefaultPos(shadow);
             }
-            Transform transformX = new Rotate(deltaX, new Point3D(0, 1, 0));
-            mesh.getTransforms().add(transformX);
+            Transform transform = new Rotate(deltaX, new Point3D(0, 1, 0));
+            mesh.getTransforms().add(transform);
+            shadow.getTransforms().add(transform);
             boxX = event.getScreenX();
             dragged = true;
         });
@@ -130,6 +146,33 @@ public class Mesh3DController implements RotatedNode3D {
         }
     }
 
+    private void resizeShadow() {
+        triangleShadowMesh.getPoints().setAll(
+                -size / 2, size*2 , -size / 2,             //0
+                -size / 2, size*2 , size / 2,              //1
+                size / 2, size*2,   -size / 2,               //2
+                size / 2, size*2 , size / 2                //3
+        );
+
+        triangleShadowMesh.getTexCoords().setAll(
+                0.00f, 0.00f,                              //0
+                0.00f, 1.00f,                              //1
+                1.00f, 0.00f,                              //2
+                1.00f, 1.00f,                              //3
+                0.00f, 0.00f,                              //4
+                0.00f, 1.00f,                              //5
+                1.00f, 0.00f,                              //6
+                1.00f, 1.00f                               //7
+        );
+
+        triangleShadowMesh.getFaces().setAll(
+                0, 4, 1, 5, 2, 6,                          // Top face1
+                1, 5, 3, 7, 2, 6                           // Top face2
+        );
+        triangleShadowMesh.getFaceSmoothingGroups().setAll(new int[triangleShadowMesh.getFaces().size() / triangleShadowMesh.getFaceElementSize()]);
+        shadow.setTranslateY(size);
+    }
+
     private void resizeMesh() {
         triangleMesh.getPoints().clear();
         triangleMesh.getTexCoords().clear();
@@ -139,14 +182,15 @@ public class Mesh3DController implements RotatedNode3D {
         float[] coords = getCoords();
         int[] facets = getFacets();
 
-        triangleMesh.getPoints().addAll(points);
-        triangleMesh.getTexCoords().addAll(coords);
-        triangleMesh.getFaces().addAll(facets);
-        triangleMesh.getFaceSmoothingGroups().addAll(new int[facets.length / triangleMesh.getFaceElementSize()]);
+        triangleMesh.getPoints().setAll(points);
+        triangleMesh.getTexCoords().setAll(coords);
+        triangleMesh.getFaces().setAll(facets);
+        triangleMesh.getFaceSmoothingGroups().setAll(new int[facets.length / triangleMesh.getFaceElementSize()]);
     }
 
     /**
      * A float array of mesh points x, y and z.
+     *
      * @return float[]
      */
     private float[] getPoints() {
@@ -165,6 +209,7 @@ public class Mesh3DController implements RotatedNode3D {
      * An array of floats representing coordinates v(vertical) and h(horizontal) ratio on a texture map.
      * The coordinates go to each facet point
      * - so if there were alternative facets added, they should appear here as well.
+     *
      * @return float[]
      */
     private float[] getCoords() {
@@ -177,7 +222,7 @@ public class Mesh3DController implements RotatedNode3D {
                 0.75f, 0.66f,                       //5
                 0.50f, 0.33f,                       //6
                 0.50f, 0.66f,                       //7
-                0.20f, 0.00f,                       //8
+                0.25f, 0.00f,                       //8
                 0.25f, 1.00f,                       //9
                 0.50f, 0.00f,                       //10
                 0.50f, 1.00f,                       //11
@@ -191,6 +236,7 @@ public class Mesh3DController implements RotatedNode3D {
      * of a triangleMesh point.
      * each second index represents an alternative face
      * for textures connection
+     *
      * @return int[]
      */
     private int[] getFacets() {
@@ -208,11 +254,12 @@ public class Mesh3DController implements RotatedNode3D {
                 3, 3, 5, 11, 7, 7};               // Front face1
     }
 
-    private void resetToDefaultPos() {
+    private void resetToDefaultPos(MeshView mesh) {
         mesh.getTransforms().clear();
         mesh.getTransforms().add(new Rotate(-100, new Point3D(0, 1, 0)));
         mesh.getTransforms().add(new Rotate(30, new Point3D(0, 1, 1)));
         mesh.getTransforms().add(new Rotate(20, new Point3D(0, 1, 0)));
+
     }
 
     private static class Tools {

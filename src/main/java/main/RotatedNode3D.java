@@ -1,7 +1,7 @@
 package main;
 
 import javafx.scene.Node;
-import javafx.scene.layout.Pane;
+import javafx.scene.Scene;
 
 public interface RotatedNode3D {
 
@@ -15,7 +15,7 @@ public interface RotatedNode3D {
      * Gets a root pane of the object
      * @return background Pane
      */
-    Pane getRoot();
+    Scene getScene();
 
     /**
      * Gets a node by which you can move the whole object
