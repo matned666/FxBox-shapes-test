@@ -9,25 +9,17 @@ import javafx.stage.StageStyle;
 
 public class MainApp3DMesh extends Application {
 
+    private static final double X_STAGE_MOVE = 1.5;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
-
-        RotatedNode3D controller = Mesh3DController.createWithSize(50);
+        RotatedNode3D controller = Mesh3DController.createMovableWithSize(primaryStage, 50);
         Scene scene = controller.getScene();
         primaryStage.setScene(scene);
         primaryStage.initStyle(StageStyle.TRANSPARENT);
-
         primaryStage.show();
-        primaryStage.setX(primaryStage.getX()*3/2);
-
+        primaryStage.setX(primaryStage.getX()* X_STAGE_MOVE);
         primaryStage.setAlwaysOnTop(true);
-        controller.getMoveNode().setOnMouseDragged(event -> {
-            double x = event.getScreenX();
-            double y = event.getScreenY();
-            primaryStage.setX(x - controller.getMoveNode().getLayoutX());
-            primaryStage.setY(y - controller.getMoveNode().getLayoutY() - controller.getMoveNode().getTranslateY());
-        });
-
     }
 
 }
