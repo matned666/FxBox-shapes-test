@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.MeshView?>
+
+<StackPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fx3d.RotatingCube4Panel3DView">
+   <Circle fx:id="moveNode" fill="#1f93ff31" radius="9.0" stroke="#0000003b" strokeType="INSIDE" translateY="-150.0">
+      <cursor>
+         <Cursor fx:constant="MOVE" />
+      </cursor>
+   </Circle>
+   <MeshView fx:id="boxMesh">
+      <cursor>
+         <Cursor fx:constant="HAND" />
+      </cursor>
+   </MeshView>
+   <MeshView fx:id="shadowMesh">
+      <cursor>
+         <Cursor fx:constant="HAND" />
+      </cursor>
+   </MeshView>
+</StackPane>
